@@ -78,6 +78,7 @@ function populateWordBank(translatedSentence) {
     clearWords();
 
     const words = translatedSentence.split(' ');
+    const shuffledWords = shuffleArray(words);
 
     words.forEach(word => {
         const newButton = document.createElement('button');
