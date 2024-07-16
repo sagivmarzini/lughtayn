@@ -2,7 +2,7 @@
 
 :root {
     --background: #f1f2f3;
-    --primary: rgb(39, 195, 39);
+    --primary: #27c327;
     direction: rtl;
 }
 
@@ -54,6 +54,7 @@ h2 {
     border-radius: 1rem;
     padding: 10px;
     margin: 20px 0;
+    background-color: white;
 }
 
 #construct-sentence {
@@ -66,6 +67,7 @@ h2 {
     flex-wrap: wrap;
     align-content: flex-start;
     gap: 5px;
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 #word-bank {
@@ -94,7 +96,7 @@ h2 {
     cursor: pointer;
 }
 
-#check {
+.submit {
     width: 100%;
     height: 50px;
     border-radius: 1rem;
@@ -104,15 +106,16 @@ h2 {
     font-weight: 700;
     border: none;
     box-shadow: 1px 2px lightgray;
+    transition: 0.1s all ease;
 }
 
-#check:hover {
+.submit:hover {
     box-shadow: none;
     transform: translate(1px, 2px);
     cursor: pointer;
 }
 
-#check:disabled {
+.submit:disabled {
     background-color: lightgray;
     color: gray;
     box-shadow: none;
