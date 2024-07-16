@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+:root {
+    --background: #f1f2f3;
+    --primary: rgb(39, 195, 39);
+    direction: rtl;
+}
+
+*, *::before, *::after {
+    font-family: "Rubik", sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding: 5%;
+    background-color: var(--background);
+    height: 100vh;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: rgb(210, 210, 210);
+    border-radius: 2rem;
+    margin: 15px 0;
+}
+
+#progress {
+    position: relative;
+    width: 10%;
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 2rem;
+}
+
+.progress-shine {
+    position: relative;
+    background-color: rgb(110, 216, 110);
+    width: calc(100% - 20px);
+    height: 4px;
+    right: 10px;
+    top: 5px;
+    border-radius: 2rem;
+}
+
+h2 {
+    margin: 20px 0;
+}
+
+#sentence {
+    border: 1px solid lightgray;
+    border-radius: 1rem;
+    padding: 10px;
+    margin: 20px 0;
+}
+
+#construct-sentence {
+    min-height: 100px;
+    width: 100%;
+    border: 1px dashed rgb(162, 162, 162);
+    border-radius: 1rem;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 5px;
+}
+
+#word-bank {
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 5px;
+}
+
+.word {
+    font-size: 1rem;
+    padding: 5px 15px;
+    margin: 1px;
+    background-color: white;
+    border: 2px solid lightgray;
+    box-shadow: 1px 2px lightgray;
+    border-radius: 0.7rem;
+    transition: 0.1s all ease;
+}
+
+.word:hover {
+    box-shadow: none;
+    transform: translate(2px, 3px);
+    cursor: pointer;
+}
+
+#check {
+    width: 100%;
+    height: 50px;
+    border-radius: 1rem;
+    background-color: var(--primary);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: none;
+    box-shadow: 1px 2px lightgray;
+}
+
+#check:hover {
+    box-shadow: none;
+    transform: translate(1px, 2px);
+    cursor: pointer;
+}
+
+#check:disabled {
+    background-color: lightgray;
+    color: gray;
+    box-shadow: none;
+    pointer-events: none;
+}
