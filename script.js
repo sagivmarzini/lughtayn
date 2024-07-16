@@ -1,6 +1,6 @@
 import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
-const sentences = ['השכנים שלי תמיד נחמדים', 'אני הולך לבית ספר כל יום', 'אני לא בטוח שאני מבין', 'איך אני אמור לעשות את זה?'];
+let sentences = [];
 let shuffledSentences = [];
 let currentSentenceIndex = 0;
 let currentSentence = '';
@@ -14,6 +14,18 @@ const sentenceDisplay = document.getElementById('sentence');
 checkButton.addEventListener('click', checkAnswer);
 
 startGame();
+
+async function fetchSentences() {
+    try {
+        const response = await fetch('api/hebrew-sentences.json');
+        const sentences = await response.json();
+        console.log(sentences); // You now have access to the array
+        // Use the sentences array here
+        return sentences;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+}
 
 function updateCheckButtonState() {
     checkButton.disabled = sentenceConstructArea.children.length === 0;
@@ -37,6 +49,10 @@ function handleWordMovement() {
 }
 
 async function startGame() {
+    if (sentences.length === 0) {
+        sentences = await fetchSentences();
+    }
+
     shuffledSentences = shuffleArray([...sentences]);
 
     currentSentence = shuffledSentences[currentSentenceIndex].trim();
