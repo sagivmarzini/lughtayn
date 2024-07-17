@@ -136,12 +136,14 @@ function populateWordBank(translatedSentence) {
 }
 
 function checkAnswer() {
-    const userSentence = [...sentenceConstructArea.children].map(word => word.textContent).join(' ');
+    const constructWords = [...sentenceConstructArea.children].map(word => word.textContent);
+    const userSentence = constructWords.join(' ');
 
     // Disable clicking on the words
     document.querySelectorAll('.word').forEach(word => {word.style.pointerEvents = 'none'});
 
-    if (userSentence === arabicSentence.replace('؟', '')) { // Correct answer
+    // if (userSentence === arabicSentence.replace('؟', '')) { 
+    if (compareSentenceWithWordArray(arabicSentence.replace('؟', ''), constructWords)) {// Correct answer
         // checkButton.innerHTML = '<img src=assets/tick.svg style="height: 30px; color: white;"></img>';
         correctAnswerContainer.classList.add('correct');
         document.body.style.backgroundColor = '#f6fef6';
@@ -234,4 +236,31 @@ function levelUp() {
     levelupScore = Math.pow(level, 2);
 
     updateProgressBar();
+}
+
+function compareSentenceWithWordArray(sentence, wordArray) {
+    // Split the sentence into words
+    const sentenceWords = sentence.trim().split(/\s+/);
+    
+    // Check if the lengths are too different
+    if (Math.abs(sentenceWords.length - wordArray.length) > 0) {
+        return false;
+    }
+    
+    // Count matching words
+    let matchCount = 0;
+    let usedIndices = new Set();
+    
+    for (let i = 0; i < sentenceWords.length; i++) {
+        for (let j = 0; j < wordArray.length; j++) {
+            if (sentenceWords[i] === wordArray[j] && !usedIndices.has(j)) {
+                matchCount++;
+                usedIndices.add(j);
+                break;
+            }
+        }
+    }
+    
+    // Allow for one word to be out of place or missing/extra
+    return matchCount >= Math.max(sentenceWords.length, wordArray.length) - 1;
 }
