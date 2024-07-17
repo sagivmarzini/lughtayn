@@ -59,8 +59,13 @@ function handleWordMovement() {
 
 async function startGame() {
     if (sentences.length === 0) {
-        sentences = await fetchSentences();
-        shuffledSentences = shuffleArray([...sentences]);
+        if (loadGameState()) {
+            console.log("Loaded saved game");
+        } else {
+            console.log("No save found, starting new game...")
+            sentences = await fetchSentences();
+            shuffledSentences = shuffleArray([...sentences]);
+        }
     }
     
     if (nextSentence) {
@@ -75,10 +80,11 @@ async function startGame() {
         diacritizedArabic = await diacritizeSentence(arabicSentence);
         sentenceAudio = await generateSentenceAudio(diacritizedArabic);
     }
+
+    saveGameState();
     
     loadGameContents();
     
-    // Start preloading the next sentence
     preloadNextSentence();
 }
 
@@ -142,22 +148,19 @@ function checkAnswer() {
     const userSentence = constructWords.join(' ');
 
     // Disable clicking on the words
-    document.querySelectorAll('.word').forEach(word => {word.style.pointerEvents = 'none'});
+    document.querySelectorAll('.word').forEach(word => { word.style.pointerEvents = 'none' });
 
-    // if (userSentence === arabicSentence.replace('؟', '')) { 
-    if (compareSentenceWithWordArray(arabicSentence.replace('؟', ''), constructWords)) {// Correct answer
-        // checkButton.innerHTML = '<img src=assets/tick.svg style="height: 30px; color: white;"></img>';
+    if (compareSentenceWithWordArray(arabicSentence.replace('؟', ''), constructWords)) { // Correct answer
         correctAnswerContainer.classList.add('correct');
         document.body.style.backgroundColor = '#f6fef6';
 
         score++;
     } else {
         checkButton.style.backgroundColor = '#C22B27';
-        // checkButton.innerHTML = '<img src=assets/x.svg style="height: 30px; color: white;"></img>';
         correctAnswerContainer.classList.add('incorrect');
         document.body.style.backgroundColor = '#fdf7f6';
 
-        if (score > 0) score--;
+        if (score > 0) score--; // Prevent negative score
     }
 
     updateProgressBar();
@@ -265,4 +268,43 @@ function compareSentenceWithWordArray(sentence, wordArray) {
     
     // Allow for one word to be out of place or missing/extra
     return matchCount >= Math.max(sentenceWords.length, wordArray.length) - 1;
+}
+
+function saveGameState() {
+    const gameState = {
+        sentences,
+        shuffledSentences: shuffledSentences,
+        currentSentenceIndex,
+        currentSentence,
+        arabicSentence,
+        diacritizedArabic,
+        nextSentence,
+        sentenceAudio,
+        score,
+        levelupScore,
+        level
+    };
+    localStorage.setItem('LughtaynGameState', JSON.stringify(gameState));
+}
+
+function loadGameState() {
+    const savedState = localStorage.getItem('LughtaynGameState');
+    if (savedState) {
+        const gameState = JSON.parse(savedState);
+        ({
+            sentences,
+            shuffledSentences,
+            currentSentenceIndex,
+            currentSentence,
+            arabicSentence,
+            diacritizedArabic,
+            nextSentence,
+            sentenceAudio,
+            score,
+            levelupScore,
+            level
+        } = gameState);
+        return true;
+    }
+    return false;
 }
