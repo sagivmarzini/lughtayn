@@ -187,6 +187,8 @@ function checkAnswer() {
     checkButton.innerText = 'המשך'
     checkButton.removeEventListener('click', checkAnswer);
     checkButton.addEventListener('click', nextQuestion);
+
+    saveGameState();
 }
 
 function nextQuestion() {
