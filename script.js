@@ -31,7 +31,7 @@ async function fetchSentences() {
         // Use the sentences array here
         return sentences;
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching Hebrew sentences:', error);
       }
 }
 
@@ -88,10 +88,10 @@ async function startGame() {
 async function translateSentence(sentence) {
     const client = await Client.connect("guymorlan/levanti_he_ar");
     const result = await client.predict("/run_translate", { 		
-            text: sentence[0],
-            input_text: sentence,
-            hidden_arabic: "",
-            dialect: "פלסטיני",
+        text: sentence[0],
+        input_text: sentence,
+        hidden_arabic: "",
+        dialect: "פלסטיני",
     });
 
     return result.data[1];
@@ -111,8 +111,8 @@ async function diacritizeSentence(arabicSentence) {
 async function generateSentenceAudio(sentence) {
     const client = await Client.connect("guymorlan/levanti_en_ar");
     const result = await client.predict("/get_audio", { 		
-        text: arabicSentence[0], 
-        input_text: arabicSentence, 
+        text: sentence[0], 
+        input_text: sentence, 
     });
 
     return result.data[0].url;
@@ -160,6 +160,8 @@ function checkAnswer() {
 
     correctAnswer.innerText = diacritizedArabic;
     correctAnswerContainer.classList.add('show');
+
+    new Audio(sentenceAudio).play();
 
     checkButton.innerText = 'המשך'
     checkButton.removeEventListener('click', checkAnswer);
