@@ -121,8 +121,10 @@ function nextQuestion() {
     if (currentSentenceIndex >= shuffledSentences.length) {
         // If we've gone through all words, reshuffle and start over
         shuffledSentences = shuffleArray([...sentences]);
-        currentWordIndex = 0;
+        currentSentenceIndex = 0;
     }
+    
+    currentSentenceIndex++;
 
     // Start the game again with the next sentence
     startGame();
