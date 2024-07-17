@@ -4,8 +4,8 @@ let sentences = [];
 let shuffledSentences = [];
 let currentSentenceIndex = 0;
 let currentSentence = '';
-let translatedSentence = '';
-let diacritizedSentence = '';
+let arabicSentence = '';
+let diacritizedArabic = '';
 let nextSentence = null;
 let sentenceAudio = null;
 let score = 0;
@@ -67,19 +67,19 @@ async function startGame() {
 
     if (nextSentence) {
         currentSentence = nextSentence.original;
-        translatedSentence = nextSentence.translated;
-        diacritizedSentence = nextSentence.diacritized;
+        arabicSentence = nextSentence.translated;
+        diacritizedArabic = nextSentence.diacritized;
         sentenceAudio = nextSentence.audio;
         nextSentence = null;
     } else {
         currentSentence = shuffledSentences[currentSentenceIndex].trim();
-        translatedSentence = await translateSentence(currentSentence);
-        diacritizedSentence = await diacritizeSentence(translatedSentence);
-        sentenceAudio = await generateSentenceAudio(diacritizedSentence);
+        arabicSentence = await translateSentence(currentSentence);
+        diacritizedArabic = await diacritizeSentence(arabicSentence);
+        sentenceAudio = await generateSentenceAudio(diacritizedArabic);
     }
 
     sentenceDisplay.innerText = currentSentence;
-    populateWordBank(translatedSentence);
+    populateWordBank(arabicSentence);
 
     // Start preloading the next sentence
     preloadNextSentence();
@@ -111,8 +111,8 @@ async function diacritizeSentence(arabicSentence) {
 async function generateSentenceAudio(sentence) {
     const client = await Client.connect("guymorlan/levanti_en_ar");
     const result = await client.predict("/get_audio", { 		
-        text: translatedSentence[0], 
-        input_text: translatedSentence, 
+        text: arabicSentence[0], 
+        input_text: arabicSentence, 
     });
 
     return result.data[0].url;
@@ -141,7 +141,7 @@ function checkAnswer() {
     // Disable clicking on the words
     document.querySelectorAll('.word').forEach(word => {word.style.pointerEvents = 'none'});
 
-    if (userSentence === translatedSentence.replace('؟', '')) { // Correct answer
+    if (userSentence === arabicSentence.replace('؟', '')) { // Correct answer
         // checkButton.innerHTML = '<img src=assets/tick.svg style="height: 30px; color: white;"></img>';
         correctAnswerContainer.classList.add('correct');
         document.body.style.backgroundColor = '#f6fef6';
@@ -158,7 +158,7 @@ function checkAnswer() {
 
     updateProgressBar();
 
-    correctAnswer.innerText = diacritizedSentence;
+    correctAnswer.innerText = diacritizedArabic;
     correctAnswerContainer.classList.add('show');
 
     checkButton.innerText = 'המשך'
@@ -173,14 +173,15 @@ function nextQuestion() {
 
     // Reset button styles and content
     checkButton.innerHTML = 'בדיקה';
-    checkButton.style.backgroundColor = 'var(--primary)';
+    checkButton.style.clear;
+    updateCheckButtonState();
     document.body.style.backgroundColor = 'var(--background)';
-
+    
     currentSentenceIndex = (currentSentenceIndex + 1) % shuffledSentences.length;
-
+    
     // Start the game again with the next sentence
     startGame();
-
+    
     // Switch back to checkAnswer listener
     checkButton.removeEventListener('click', nextQuestion);
     checkButton.addEventListener('click', checkAnswer);
