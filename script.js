@@ -5,6 +5,7 @@ let shuffledSentences = [];
 let currentSentenceIndex = 0;
 let currentSentence = '';
 let translatedSentence = '';
+let nextSentence = null;
 
 const sentenceConstructArea = document.getElementById('construct-sentence');
 const wordBankArea = document.getElementById('word-bank');
@@ -55,11 +56,20 @@ async function startGame() {
         shuffledSentences = shuffleArray([...sentences]);
     }
 
-    currentSentence = shuffledSentences[currentSentenceIndex].trim();
-    translatedSentence = await translateSentence(currentSentence);
+    if (nextSentence) {
+        currentSentence = nextSentence.original;
+        translatedSentence = nextSentence.translated;
+        nextSentence = null;
+    } else {
+        currentSentence = shuffledSentences[currentSentenceIndex].trim();
+        translatedSentence = await translateSentence(currentSentence);
+    }
 
     sentenceDisplay.innerText = currentSentence;
     populateWordBank(translatedSentence);
+
+    // Start preloading the next sentence
+    preloadNextSentence();
 }
 
 async function translateSentence(sentence) {
@@ -72,6 +82,16 @@ async function translateSentence(sentence) {
     });
 
     return result.data[1];
+}
+
+async function diacritizeSentence(sentence) {
+    const client = await Client.connect("guymorlan/levanti_he_ar");
+    const result = await client.predict("/diacritize", { 		
+        text: result.data[1][0],
+        input_text: result.data[1], 
+    });
+
+    return result.data[0]
 }
 
 function populateWordBank(translatedSentence) {
@@ -93,6 +113,9 @@ function populateWordBank(translatedSentence) {
 
 function checkAnswer() {
     const userSentence = [...sentenceConstructArea.children].map(word => word.textContent).join(' ');
+
+    // Disable clicking on the words
+    document.querySelectorAll('.word').forEach(word => {word.style.pointerEvents = 'none'});
 
     if (userSentence === translatedSentence) { // Correct answer
         // checkButton.innerHTML = '<img src=assets/tick.svg style="height: 30px; color: white;"></img>';
@@ -125,13 +148,7 @@ function nextQuestion() {
     checkButton.style.backgroundColor = 'var(--primary)';
     document.body.style.backgroundColor = 'var(--background)';
 
-    if (currentSentenceIndex >= shuffledSentences.length) {
-        // If we've gone through all words, reshuffle and start over
-        shuffledSentences = shuffleArray([...sentences]);
-        currentSentenceIndex = 0;
-    }
-    
-    currentSentenceIndex++;
+    currentSentenceIndex = (currentSentenceIndex + 1) % shuffledSentences.length;
 
     // Start the game again with the next sentence
     startGame();
@@ -152,4 +169,11 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+async function preloadNextSentence() {
+    const nextIndex = (currentSentenceIndex + 1) % shuffledSentences.length;
+    const sentence = shuffledSentences[nextIndex].trim();
+    const translated = await translateSentence(sentence);
+    nextSentence = { original: sentence, translated };
 }
