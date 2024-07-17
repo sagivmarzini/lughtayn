@@ -1,4 +1,5 @@
 import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+const client = await Client.connect("guymorlan/levanti_he_ar");
 
 let sentences = [];
 let shuffledSentences = [];
@@ -57,14 +58,11 @@ function handleWordMovement() {
 }
 
 async function startGame() {
-    updateCheckButtonState();
-    updateProgressBar();
-
     if (sentences.length === 0) {
         sentences = await fetchSentences();
         shuffledSentences = shuffleArray([...sentences]);
     }
-
+    
     if (nextSentence) {
         currentSentence = nextSentence.original;
         arabicSentence = nextSentence.translated;
@@ -77,16 +75,21 @@ async function startGame() {
         diacritizedArabic = await diacritizeSentence(arabicSentence);
         sentenceAudio = await generateSentenceAudio(diacritizedArabic);
     }
-
-    sentenceDisplay.innerText = currentSentence;
-    populateWordBank(arabicSentence);
-
+    
+    loadGameContents();
+    
     // Start preloading the next sentence
     preloadNextSentence();
 }
 
+function loadGameContents() {
+    updateCheckButtonState();
+    updateProgressBar();
+    sentenceDisplay.innerText = currentSentence;
+    populateWordBank(arabicSentence);
+}
+
 async function translateSentence(sentence) {
-    const client = await Client.connect("guymorlan/levanti_he_ar");
     const result = await client.predict("/run_translate", { 		
         text: sentence[0],
         input_text: sentence,
@@ -98,7 +101,6 @@ async function translateSentence(sentence) {
 }
 
 async function diacritizeSentence(arabicSentence) {
-    const client = await Client.connect("guymorlan/levanti_he_ar");
     const result = await client.predict("/diacritize", { 		
         text: arabicSentence[0],
         input_text: arabicSentence,
@@ -109,10 +111,10 @@ async function diacritizeSentence(arabicSentence) {
 }
 
 async function generateSentenceAudio(sentence) {
-    const client = await Client.connect("guymorlan/levanti_en_ar");
     const result = await client.predict("/get_audio", { 		
         text: sentence[0], 
-        input_text: sentence, 
+        input_text: sentence,
+        hidden_arabic: ''
     });
 
     return result.data[0].url;
@@ -223,7 +225,7 @@ function updateProgressBar() {
 
         setTimeout(() => {
             levelUp();
-        }, 500);
+        }, 1000);
     }
 }
 
