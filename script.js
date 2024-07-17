@@ -51,9 +51,8 @@ function handleWordMovement() {
 async function startGame() {
     if (sentences.length === 0) {
         sentences = await fetchSentences();
+        shuffledSentences = shuffleArray([...sentences]);
     }
-
-    shuffledSentences = shuffleArray([...sentences]);
 
     currentSentence = shuffledSentences[currentSentenceIndex].trim();
     translatedSentence = await translateSentence(currentSentence);
