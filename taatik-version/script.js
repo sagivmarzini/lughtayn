@@ -18,7 +18,8 @@ const wordBankArea = document.getElementById('word-bank');
 const checkButton = document.getElementById('check');
 const sentenceDisplay = document.getElementById('sentence');
 const correctAnswerContainer = document.getElementById('correct-answer-container');
-const correctAnswer = document.getElementById('correct-answer');
+const correctAnswerTaatik = document.getElementById('taatik');
+const correctAnswerArabic = document.getElementById('arabic');
 const progressBar = document.getElementById('progress');
 
 checkButton.addEventListener('click', checkAnswer);
@@ -27,7 +28,7 @@ startGame();
 
 async function fetchSentences() {
     try {
-        const response = await fetch('api/hebrew-sentences.json');
+        const response = await fetch('../api/hebrew-sentences.json');
         const sentences = await response.json();
         // Use the sentences array here
         return sentences;
@@ -59,13 +60,13 @@ function handleWordMovement() {
 
 async function startGame() {
     if (sentences.length === 0) {
-        if (loadGameState()) {
-            console.log("Loaded saved game");
-        } else {
+        // if (loadGameState()) {
+        //     console.log("Loaded saved game");
+        // } else {
             console.log("No save found, starting new game...")
             sentences = await fetchSentences();
             shuffledSentences = shuffleArray([...sentences]);
-        }
+        // }
     }
     
     if (nextSentence) {
@@ -78,6 +79,7 @@ async function startGame() {
         currentSentence = shuffledSentences[currentSentenceIndex].trim();
         arabicSentence = await translateSentence(currentSentence);
         diacritizedArabic = await diacritizeSentence(arabicSentence);
+        arabicSentence = await generateTaatik(diacritizedArabic);
         sentenceAudio = await generateSentenceAudio(diacritizedArabic);
     }
 
@@ -126,10 +128,20 @@ async function generateSentenceAudio(sentence) {
     return result.data[0].url;
 }
 
+async function generateTaatik(diacritizedSentence) {
+    const result = await client.predict("/taatik", { 		
+        text: diacritizedSentence[0], 
+        input_text: diacritizedSentence,
+        hidden_arabic: ''
+    });
+
+    return result.data[0];
+}
+
 function populateWordBank(translatedSentence) {
     clearWords();
 
-    const words = translatedSentence.replace('؟', '').split(' ');
+    const words = translatedSentence.replace('?', '').split(' ');
     const shuffledWords = shuffleArray(words);
 
     words.forEach(word => {
@@ -150,7 +162,7 @@ function checkAnswer() {
     // Disable clicking on the words
     document.querySelectorAll('.word').forEach(word => { word.style.pointerEvents = 'none' });
 
-    if (compareSentenceWithWordArray(arabicSentence.replace('؟', ''), constructWords)) { // Correct answer
+    if (compareSentenceWithWordArray(arabicSentence.replace('?', ''), constructWords)) { // Correct answer
         correctAnswerContainer.classList.add('correct');
         document.body.style.backgroundColor = '#f6fef6';
 
@@ -165,7 +177,8 @@ function checkAnswer() {
 
     updateProgressBar();
 
-    correctAnswer.innerText = diacritizedArabic;
+    correctAnswerTaatik.innerText = arabicSentence;
+    correctAnswerArabic.innerText = diacritizedArabic;
     correctAnswerContainer.classList.add('show');
 
     new Audio(sentenceAudio).play();
@@ -212,8 +225,9 @@ function shuffleArray(array) {
 async function preloadNextSentence() {
     const nextIndex = (currentSentenceIndex + 1) % shuffledSentences.length;
     const sentence = shuffledSentences[nextIndex].trim();
-    const translated = await translateSentence(sentence);
+    let translated = await translateSentence(sentence);
     const diacritized = await diacritizeSentence(translated);
+    translated = await generateTaatik(diacritized);
     const audioUrl = await generateSentenceAudio(diacritized);
     nextSentence = { original: sentence, translated, diacritized, audio: audioUrl };
 }
@@ -284,11 +298,11 @@ function saveGameState() {
         levelupScore,
         level
     };
-    localStorage.setItem('LughtaynGameState', JSON.stringify(gameState));
+    localStorage.setItem('LughtaynTaatikGameState', JSON.stringify(gameState));
 }
 
 function loadGameState() {
-    const savedState = localStorage.getItem('LughtaynGameState');
+    const savedState = localStorage.getItem('LughtaynTaatikGameState');
     if (savedState) {
         const gameState = JSON.parse(savedState);
         ({
