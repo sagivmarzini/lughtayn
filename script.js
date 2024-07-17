@@ -5,7 +5,12 @@ let shuffledSentences = [];
 let currentSentenceIndex = 0;
 let currentSentence = '';
 let translatedSentence = '';
+let diacritizedSentence = '';
 let nextSentence = null;
+let sentenceAudio = null;
+let score = 0;
+let levelupScore = 5;
+let level = 1;
 
 const sentenceConstructArea = document.getElementById('construct-sentence');
 const wordBankArea = document.getElementById('word-bank');
@@ -13,6 +18,7 @@ const checkButton = document.getElementById('check');
 const sentenceDisplay = document.getElementById('sentence');
 const correctAnswerContainer = document.getElementById('correct-answer-container');
 const correctAnswer = document.getElementById('correct-answer');
+const progressBar = document.getElementById('progress');
 
 checkButton.addEventListener('click', checkAnswer);
 
@@ -51,6 +57,9 @@ function handleWordMovement() {
 }
 
 async function startGame() {
+    updateCheckButtonState();
+    updateProgressBar();
+
     if (sentences.length === 0) {
         sentences = await fetchSentences();
         shuffledSentences = shuffleArray([...sentences]);
@@ -59,10 +68,14 @@ async function startGame() {
     if (nextSentence) {
         currentSentence = nextSentence.original;
         translatedSentence = nextSentence.translated;
+        diacritizedSentence = nextSentence.diacritized;
+        sentenceAudio = nextSentence.audio;
         nextSentence = null;
     } else {
         currentSentence = shuffledSentences[currentSentenceIndex].trim();
         translatedSentence = await translateSentence(currentSentence);
+        diacritizedSentence = await diacritizeSentence(translatedSentence);
+        sentenceAudio = await generateSentenceAudio(diacritizedSentence);
     }
 
     sentenceDisplay.innerText = currentSentence;
@@ -84,20 +97,31 @@ async function translateSentence(sentence) {
     return result.data[1];
 }
 
-async function diacritizeSentence(sentence) {
+async function diacritizeSentence(arabicSentence) {
     const client = await Client.connect("guymorlan/levanti_he_ar");
     const result = await client.predict("/diacritize", { 		
-        text: result.data[1][0],
-        input_text: result.data[1], 
+        text: arabicSentence[0],
+        input_text: arabicSentence,
+        hidden_arabic: "",
     });
 
-    return result.data[0]
+    return result.data[0];
+}
+
+async function generateSentenceAudio(sentence) {
+    const client = await Client.connect("guymorlan/levanti_en_ar");
+    const result = await client.predict("/get_audio", { 		
+        text: translatedSentence[0], 
+        input_text: translatedSentence, 
+    });
+
+    return result.data[0].url;
 }
 
 function populateWordBank(translatedSentence) {
     clearWords();
 
-    const words = translatedSentence.split(' ');
+    const words = translatedSentence.replace('؟', '').split(' ');
     const shuffledWords = shuffleArray(words);
 
     words.forEach(word => {
@@ -117,20 +141,24 @@ function checkAnswer() {
     // Disable clicking on the words
     document.querySelectorAll('.word').forEach(word => {word.style.pointerEvents = 'none'});
 
-    if (userSentence === translatedSentence) { // Correct answer
+    if (userSentence === translatedSentence.replace('؟', '')) { // Correct answer
         // checkButton.innerHTML = '<img src=assets/tick.svg style="height: 30px; color: white;"></img>';
         correctAnswerContainer.classList.add('correct');
-
         document.body.style.backgroundColor = '#f6fef6';
+
+        score++;
     } else {
         checkButton.style.backgroundColor = '#C22B27';
         // checkButton.innerHTML = '<img src=assets/x.svg style="height: 30px; color: white;"></img>';
         correctAnswerContainer.classList.add('incorrect');
-
         document.body.style.backgroundColor = '#fdf7f6';
+
+        if (score > 0) score--;
     }
 
-    correctAnswer.innerText = translatedSentence;
+    updateProgressBar();
+
+    correctAnswer.innerText = diacritizedSentence;
     correctAnswerContainer.classList.add('show');
 
     checkButton.innerText = 'המשך'
@@ -175,5 +203,32 @@ async function preloadNextSentence() {
     const nextIndex = (currentSentenceIndex + 1) % shuffledSentences.length;
     const sentence = shuffledSentences[nextIndex].trim();
     const translated = await translateSentence(sentence);
-    nextSentence = { original: sentence, translated };
+    const diacritized = await diacritizeSentence(translated);
+    const audioUrl = await generateSentenceAudio(diacritized);
+    nextSentence = { original: sentence, translated, diacritized, audio: audioUrl };
+}
+
+function updateProgressBar() {
+    const progressPercentage = (score / levelupScore) * 100;
+
+    progressBar.style.width = `${progressPercentage}%`;
+
+    if (score >= levelupScore) {
+        progressBar.style.width = '100%';
+
+        setTimeout(() => {
+            levelUp();
+        }, 500);
+    }
+}
+
+function levelUp() {
+    level++;
+
+    score = 0;
+
+    // Calculate new words required for next level
+    levelupScore = Math.pow(level, 2);
+
+    updateProgressBar();
 }
