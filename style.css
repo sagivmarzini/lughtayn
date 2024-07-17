@@ -17,7 +17,7 @@
 body {
     padding: 5%;
     background-color: var(--background);
-    height: 100vh;
+    height: 100svh;
 }
 
 .progress-bar {
@@ -122,3 +122,42 @@ h2 {
     box-shadow: none;
     pointer-events: none;
 }
+
+#correct-answer-container {
+    position: fixed;
+    background-color: lightgray;
+    width: 100%;
+    right: 0;
+    bottom: -200px;
+    height: 200px;
+    padding: 30px;
+    border-radius: 2rem 2rem 0 0;
+    transition: 0.3s all ease;
+}
+
+#correct-answer-container.show {
+    bottom: 0;
+}
+
+#correct-answer-container.correct {
+    background-color: #aff7af;
+    color: #156815;
+}
+
+#correct-answer-container.incorrect {
+    background-color: #ffbbb9;
+    color: #470806;
+}
+
+#correct-answer-container h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#correct-answer {
+    font-size: 1.4rem;
+    font-weight: 300;
+    margin-top: 20px;
+    color: inherit;
+}
+

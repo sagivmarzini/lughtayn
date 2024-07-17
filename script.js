@@ -10,6 +10,8 @@ const sentenceConstructArea = document.getElementById('construct-sentence');
 const wordBankArea = document.getElementById('word-bank');
 const checkButton = document.getElementById('check');
 const sentenceDisplay = document.getElementById('sentence');
+const correctAnswerContainer = document.getElementById('correct-answer-container');
+const correctAnswer = document.getElementById('correct-answer');
 
 checkButton.addEventListener('click', checkAnswer);
 
@@ -19,7 +21,6 @@ async function fetchSentences() {
     try {
         const response = await fetch('api/hebrew-sentences.json');
         const sentences = await response.json();
-        console.log(sentences); // You now have access to the array
         // Use the sentences array here
         return sentences;
       } catch (error) {
@@ -93,18 +94,23 @@ function populateWordBank(translatedSentence) {
 function checkAnswer() {
     const userSentence = [...sentenceConstructArea.children].map(word => word.textContent).join(' ');
 
-    console.log(userSentence);
-    if (userSentence === translatedSentence) {
-        checkButton.innerHTML = '<img src=tick.svg style="height: 30px; color: white;"></img>';
+    if (userSentence === translatedSentence) { // Correct answer
+        // checkButton.innerHTML = '<img src=assets/tick.svg style="height: 30px; color: white;"></img>';
+        correctAnswerContainer.classList.add('correct');
 
-        document.body.style.backgroundColor = '#eafbea';
+        document.body.style.backgroundColor = '#f6fef6';
     } else {
         checkButton.style.backgroundColor = '#C22B27';
-        checkButton.innerHTML = '<img src=x.svg style="height: 30px; color: white;"></img>';
+        // checkButton.innerHTML = '<img src=assets/x.svg style="height: 30px; color: white;"></img>';
+        correctAnswerContainer.classList.add('incorrect');
 
-        document.body.style.backgroundColor = '#fbeae9';
+        document.body.style.backgroundColor = '#fdf7f6';
     }
 
+    correctAnswer.innerText = translatedSentence;
+    correctAnswerContainer.classList.add('show');
+
+    checkButton.innerText = 'המשך'
     checkButton.removeEventListener('click', checkAnswer);
     checkButton.addEventListener('click', nextQuestion);
 }
@@ -112,6 +118,7 @@ function checkAnswer() {
 function nextQuestion() {
     sentenceDisplay.innerHTML = '';
     clearWords();
+    correctAnswerContainer.classList = '';
 
     // Reset button styles and content
     checkButton.innerHTML = 'בדיקה';
