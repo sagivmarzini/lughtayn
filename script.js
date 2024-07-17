@@ -173,7 +173,7 @@ function nextQuestion() {
 
     // Reset button styles and content
     checkButton.innerHTML = 'בדיקה';
-    checkButton.style.clear;
+    checkButton.style = '';
     updateCheckButtonState();
     document.body.style.backgroundColor = 'var(--background)';
     
