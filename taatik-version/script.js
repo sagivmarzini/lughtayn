@@ -174,7 +174,12 @@ function nextQuestion() {
 
 function clearWords() {
     wordBankArea.innerHTML = '';
-    sentenceConstructArea.innerHTML = '';
+    // sentenceConstructArea.innerHTML = '';
+    Array.from(sentenceConstructArea.children).forEach(element => {
+        if (element.classList.contains('word')) {
+            element.remove();
+        }
+    })
 }
 
 function shuffleArray(array) {

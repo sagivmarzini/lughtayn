@@ -64,13 +64,28 @@ h2 {
     width: 100%;
     border: 1px dashed rgb(162, 162, 162);
     border-radius: 1rem;
-    padding: 10px;
+    padding: 15px;
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    gap: 5px;
+    gap: 15px 5px;
     background-color: rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
 }
+
+.line {
+    /* width: 87%; */
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background-color: lightgray;
+    position: absolute;
+}
+
+.line:nth-child(1) { top: 55px; }
+.line:nth-child(2) { top: 110px; }
+.line:nth-child(3) { top: 165px; }
 
 #word-bank {
     margin: 20px 0;

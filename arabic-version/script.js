@@ -95,11 +95,28 @@ function loadGameContents() {
     populateWordBank(arabicSentence);
 }
 
+function populateWordBank(translatedSentence) {
+    clearWords();
+
+    const words = translatedSentence.replace('؟', '').split(' ');
+    const shuffledWords = shuffleArray(words);
+
+    words.forEach(word => {
+        const newButton = document.createElement('button');
+        newButton.classList = 'word';
+        newButton.textContent = word;
+
+        wordBankArea.appendChild(newButton);
+    })
+
+    handleWordMovement();
+}
+
 function checkAnswer() {
     new Audio(sentenceAudio).play();
 
     const constructWords = [...sentenceConstructArea.children].map(word => word.textContent);
-    const userSentence = constructWords.join(' ');
+    const userSentence = constructWords.join(' ').trim();
 
     // Disable clicking on the words
     document.querySelectorAll('.word').forEach(word => { word.style.pointerEvents = 'none' });
@@ -154,7 +171,12 @@ function nextQuestion() {
 
 function clearWords() {
     wordBankArea.innerHTML = '';
-    sentenceConstructArea.innerHTML = '';
+    // sentenceConstructArea.innerHTML = '';
+    Array.from(sentenceConstructArea.children).forEach(element => {
+        if (element.classList.contains('word')) {
+            element.remove();
+        }
+    })
 }
 
 function shuffleArray(array) {
@@ -294,21 +316,4 @@ async function generateSentenceAudio(sentence) {
     });
 
     return result.data[0].url;
-}
-
-function populateWordBank(translatedSentence) {
-    clearWords();
-
-    const words = translatedSentence.replace('؟', '').split(' ');
-    const shuffledWords = shuffleArray(words);
-
-    words.forEach(word => {
-        const newButton = document.createElement('button');
-        newButton.classList = 'word';
-        newButton.textContent = word;
-
-        wordBankArea.appendChild(newButton);
-    })
-
-    handleWordMovement();
 }
