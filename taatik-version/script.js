@@ -97,58 +97,17 @@ function loadGameContents() {
     populateWordBank(arabicSentence);
 }
 
-async function translateSentence(sentence) {
-    const result = await client.predict("/run_translate", { 		
-        text: sentence[0],
-        input_text: sentence,
-        hidden_arabic: "",
-        dialect: "פלסטיני",
-    });
-
-    return result.data[1];
-}
-
-async function diacritizeSentence(arabicSentence) {
-    const result = await client.predict("/diacritize", { 		
-        text: arabicSentence[0],
-        input_text: arabicSentence,
-        hidden_arabic: "",
-    });
-
-    return result.data[0];
-}
-
-async function generateSentenceAudio(sentence) {
-    const result = await client.predict("/get_audio", { 		
-        text: sentence[0], 
-        input_text: sentence,
-        hidden_arabic: ''
-    });
-
-    return result.data[0].url;
-}
-
-async function generateTaatik(diacritizedSentence) {
-    const result = await client.predict("/taatik", { 		
-        text: diacritizedSentence[0], 
-        input_text: diacritizedSentence,
-        hidden_arabic: ''
-    });
-
-    return result.data[0];
-}
-
 function populateWordBank(translatedSentence) {
     clearWords();
-
+    
     const words = translatedSentence.replace('?', '').split(' ');
     const shuffledWords = shuffleArray(words);
-
+    
     words.forEach(word => {
         const newButton = document.createElement('button');
         newButton.classList = 'word';
         newButton.textContent = word;
-
+        
         wordBankArea.appendChild(newButton);
     })
 
@@ -156,6 +115,8 @@ function populateWordBank(translatedSentence) {
 }
 
 function checkAnswer() {
+    new Audio(sentenceAudio).play();
+
     const constructWords = [...sentenceConstructArea.children].map(word => word.textContent);
     const userSentence = constructWords.join(' ');
 
@@ -182,7 +143,6 @@ function checkAnswer() {
     correctAnswerArabic.innerText = diacritizedArabic;
     correctAnswerContainer.classList.add('show');
 
-    new Audio(sentenceAudio).play();
 
     checkButton.innerText = 'המשך'
     checkButton.removeEventListener('click', checkAnswer);
@@ -324,4 +284,45 @@ function loadGameState() {
         return true;
     }
     return false;
+}
+
+async function translateSentence(sentence) {
+    const result = await client.predict("/run_translate", { 		
+        text: sentence[0],
+        input_text: sentence,
+        hidden_arabic: "",
+        dialect: "פלסטיני",
+    });
+
+    return result.data[1];
+}
+
+async function diacritizeSentence(arabicSentence) {
+    const result = await client.predict("/diacritize", { 		
+        text: arabicSentence[0],
+        input_text: arabicSentence,
+        hidden_arabic: "",
+    });
+
+    return result.data[0];
+}
+
+async function generateSentenceAudio(sentence) {
+    const result = await client.predict("/get_audio", { 		
+        text: sentence[0], 
+        input_text: sentence,
+        hidden_arabic: ''
+    });
+
+    return result.data[0].url;
+}
+
+async function generateTaatik(diacritizedSentence) {
+    const result = await client.predict("/taatik", { 		
+        text: diacritizedSentence[0], 
+        input_text: diacritizedSentence,
+        hidden_arabic: ''
+    });
+
+    return result.data[0];
 }
