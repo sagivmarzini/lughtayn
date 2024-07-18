@@ -163,3 +163,9 @@ h2 {
     color: inherit;
 }
 
+@media (min-width: 800px) {
+    body {
+        padding: 5% 20%;
+    }
+}
+
