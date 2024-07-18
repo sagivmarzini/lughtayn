@@ -60,13 +60,13 @@ function handleWordMovement() {
 
 async function startGame() {
     if (sentences.length === 0) {
-        if (loadGameState()) {
-            console.log("Loaded saved game");
-        } else {
+        // if (loadGameState()) {
+            // console.log("Loaded saved game");
+        // } else {
             console.log("No save found, starting new game...")
             sentences = await fetchSentences();
             shuffledSentences = shuffleArray([...sentences]);
-        }
+        // }
     }
     
     if (nextSentence) {
