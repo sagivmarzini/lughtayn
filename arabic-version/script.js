@@ -59,13 +59,13 @@ function handleWordMovement() {
 
 async function startGame() {
     if (sentences.length === 0) {
-        if (loadGameState()) {
-            console.log("Loaded saved game");
-        } else {
+        // if (loadGameState()) {
+        //     console.log("Loaded saved game");
+        // } else {
             console.log("No save found, starting new game...")
             sentences = await fetchSentences();
             shuffledSentences = shuffleArray([...sentences]);
-        }
+        // }
     }
     
     if (nextSentence) {
@@ -95,55 +95,9 @@ function loadGameContents() {
     populateWordBank(arabicSentence);
 }
 
-async function translateSentence(sentence) {
-    const result = await client.predict("/run_translate", { 		
-        text: sentence[0],
-        input_text: sentence,
-        hidden_arabic: "",
-        dialect: "פלסטיני",
-    });
-
-    return result.data[1];
-}
-
-async function diacritizeSentence(arabicSentence) {
-    const result = await client.predict("/diacritize", { 		
-        text: arabicSentence[0],
-        input_text: arabicSentence,
-        hidden_arabic: "",
-    });
-
-    return result.data[0];
-}
-
-async function generateSentenceAudio(sentence) {
-    const result = await client.predict("/get_audio", { 		
-        text: sentence[0], 
-        input_text: sentence,
-        hidden_arabic: ''
-    });
-
-    return result.data[0].url;
-}
-
-function populateWordBank(translatedSentence) {
-    clearWords();
-
-    const words = translatedSentence.replace('؟', '').split(' ');
-    const shuffledWords = shuffleArray(words);
-
-    words.forEach(word => {
-        const newButton = document.createElement('button');
-        newButton.classList = 'word';
-        newButton.textContent = word;
-
-        wordBankArea.appendChild(newButton);
-    })
-
-    handleWordMovement();
-}
-
 function checkAnswer() {
+    new Audio(sentenceAudio).play();
+
     const constructWords = [...sentenceConstructArea.children].map(word => word.textContent);
     const userSentence = constructWords.join(' ');
 
@@ -169,11 +123,12 @@ function checkAnswer() {
     correctAnswer.innerText = diacritizedArabic;
     correctAnswerContainer.classList.add('show');
 
-    new Audio(sentenceAudio).play();
 
     checkButton.innerText = 'המשך'
     checkButton.removeEventListener('click', checkAnswer);
     checkButton.addEventListener('click', nextQuestion);
+    
+    saveGameState();
 }
 
 function nextQuestion() {
@@ -308,4 +263,52 @@ function loadGameState() {
         return true;
     }
     return false;
+}
+
+async function translateSentence(sentence) {
+    const result = await client.predict("/run_translate", { 		
+        text: sentence[0],
+        input_text: sentence,
+        hidden_arabic: "",
+        dialect: "פלסטיני",
+    });
+
+    return result.data[1];
+}
+
+async function diacritizeSentence(arabicSentence) {
+    const result = await client.predict("/diacritize", { 		
+        text: arabicSentence[0],
+        input_text: arabicSentence,
+        hidden_arabic: "",
+    });
+
+    return result.data[0];
+}
+
+async function generateSentenceAudio(sentence) {
+    const result = await client.predict("/get_audio", { 		
+        text: sentence[0], 
+        input_text: sentence,
+        hidden_arabic: ''
+    });
+
+    return result.data[0].url;
+}
+
+function populateWordBank(translatedSentence) {
+    clearWords();
+
+    const words = translatedSentence.replace('؟', '').split(' ');
+    const shuffledWords = shuffleArray(words);
+
+    words.forEach(word => {
+        const newButton = document.createElement('button');
+        newButton.classList = 'word';
+        newButton.textContent = word;
+
+        wordBankArea.appendChild(newButton);
+    })
+
+    handleWordMovement();
 }
