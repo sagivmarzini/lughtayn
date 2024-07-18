@@ -150,7 +150,8 @@ function checkAnswer() {
     // Disable clicking on the words
     document.querySelectorAll('.word').forEach(word => { word.style.pointerEvents = 'none' });
 
-    if (compareSentenceWithWordArray(arabicSentence.replace('؟', ''), constructWords)) { // Correct answer
+    // if (compareSentenceWithWordArray(arabicSentence.replace('?', ''), constructWords)) { // Correct answer
+    if (arabicSentence.replace('?', '') === userSentence) { // Correct answer
         correctAnswerContainer.classList.add('correct');
         document.body.style.backgroundColor = '#f6fef6';
 
