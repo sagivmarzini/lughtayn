@@ -3,7 +3,7 @@ import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.m
 const client = await Client.connect("guymorlan/levanti_he_ar");
 // const client = await Client.connect("https://levantitranslate.com/");
 
-const ANSWER_COMPARE_PERCENT = 90;
+const ANSWER_COMPARE_PERCENT = 85;
 
 let sentences = [];
 let shuffledSentences = [];
@@ -20,6 +20,7 @@ let score = 0;
 let levelupScore = 5;
 let level = 1;
 
+const progressBar = document.getElementById('progress');
 const playAudioButton = document.getElementById('play-audio');
 const textarea = document.getElementById('write-sentence');
 const checkButton = document.getElementById('check');
@@ -37,13 +38,13 @@ checkButton.addEventListener('click', checkAnswer);
 
 async function startGame() {
     textarea.value = '';
+    toggleInputDisabled();
 
     if (sentences.length === 0) {
         sentences = await fetchSentences();
         shuffledSentences = shuffleArray([...sentences]);
     }
     
-    textarea.disabled = true;
     if (nextSentence) {
         currentSentence = nextSentence;
         nextSentence = null;
@@ -54,7 +55,7 @@ async function startGame() {
         currentSentence.taatik = await generateTaatik(currentSentence.diacritized);
         currentSentence.audio.src = await generateSentenceAudio(currentSentence.diacritized);
     }
-    textarea.disabled = false;
+    toggleInputDisabled();
 
     console.log(currentSentence);
     console.log(currentSentence.arabic);
@@ -76,12 +77,21 @@ function checkAnswer() {
     let userAnswer = textarea.value.trim().replace('?', '');
     let correctAnswer = currentSentence.arabic.replace('?', '');
 
-    if (similarity(userAnswer, correctAnswer) >= ANSWER_COMPARE_PERCENT) {
+    if (userAnswer === correctAnswer) {
         correctAnswerContainer.classList.add('correct');
         correctAnswerHeader.hidden = true;
         correctAnswerElement.hidden = true;
         correctAnswerTaatikElement.hidden = true;
+    
+        document.body.style.backgroundColor = '#f6fef6';
 
+        score++;
+    } else if (similarity(userAnswer, correctAnswer) >= ANSWER_COMPARE_PERCENT) {
+        correctAnswerContainer.classList.add('correct');
+        correctAnswerHeader.hidden = false;
+        correctAnswerElement.hidden = false;
+        correctAnswerTaatikElement.hidden = true;
+    
         document.body.style.backgroundColor = '#f6fef6';
 
         score++;
@@ -96,6 +106,8 @@ function checkAnswer() {
 
         if (score > 0) score--; // Prevent negative score
     }
+    
+    updateProgressBar();
 
     correctAnswerElement.textContent = correctAnswer;
     correctAnswerTaatikElement.textContent = currentSentence.taatik;
@@ -125,6 +137,31 @@ function nextQuestion() {
     // Switch back to checkAnswer listener
     checkButton.removeEventListener('click', nextQuestion);
     checkButton.addEventListener('click', checkAnswer);
+}
+
+function updateProgressBar() {
+    const progressPercentage = (score / levelupScore) * 100;
+
+    progressBar.style.width = `${progressPercentage}%`;
+
+    if (score >= levelupScore) {
+        progressBar.style.width = '100%';
+
+        setTimeout(() => {
+            levelUp();
+        }, 1000);
+    }
+}
+
+function levelUp() {
+    level++;
+
+    score = 0;
+
+    // Calculate new words required for next level
+    levelupScore = Math.pow(level, 2);
+
+    updateProgressBar();
 }
 
 async function preloadNextSentence() {

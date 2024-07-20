@@ -111,6 +111,11 @@ h2 {
     transition: 0.3s transform ease;
 }
 
+#play-audio:disabled .icon {
+    filter: invert(53%) sepia(5%) saturate(23%) hue-rotate(349deg) brightness(94%) contrast(87%);
+    pointer-events: none;
+}
+
 .icon:hover {
     transform: scale(1.1);
 }
