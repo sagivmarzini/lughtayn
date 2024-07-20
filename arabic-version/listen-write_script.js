@@ -65,8 +65,6 @@ async function startGame() {
     }
     toggleInputDisabled();
 
-    console.log(currentSentence);
-    console.log(currentSentence.arabic);
     currentSentence.audio.play();
     
     preloadNextSentence();
@@ -86,7 +84,13 @@ function checkAnswer() {
     let userAnswer = textarea.value.trim().replace('?', '');
     let correctAnswer = currentSentence.arabic.replace('?', '');
 
-    if (userAnswer === correctAnswer) {
+    console.log(userAnswer)
+    console.log(correctAnswer)
+    console.log(currentSentence.hebrew)
+
+    if (userAnswer === correctAnswer ||
+        userAnswer === currentSentence.hebrew.trim().replace('?', '')
+    ) {
         correctAnswerContainer.classList.add('correct');
         correctAnswerHeader.hidden = true;
         correctAnswerElement.hidden = true;
@@ -95,7 +99,8 @@ function checkAnswer() {
         document.body.style.backgroundColor = '#f6fef6';
 
         score++;
-    } else if (similarity(userAnswer, correctAnswer) >= ANSWER_COMPARE_PERCENT) {
+    } else if (similarity(userAnswer, correctAnswer) >= ANSWER_COMPARE_PERCENT ||
+                similarity(userAnswer, currentSentence.hebrew) >= ANSWER_COMPARE_PERCENT) {
         correctAnswerContainer.classList.add('correct');
         correctAnswerHeader.hidden = false;
         correctAnswerElement.hidden = false;
