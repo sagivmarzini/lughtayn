@@ -84,10 +84,6 @@ function checkAnswer() {
     let userAnswer = textarea.value.trim().replace('?', '');
     let correctAnswer = currentSentence.arabic.replace('?', '');
 
-    console.log(userAnswer)
-    console.log(correctAnswer)
-    console.log(currentSentence.hebrew)
-
     if (userAnswer === correctAnswer ||
         userAnswer === currentSentence.hebrew.trim().replace('?', '')
     ) {
