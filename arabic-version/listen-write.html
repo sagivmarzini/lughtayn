@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lughtayn</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="listen-write_script.js" type="module"></script>
+    <script src="https://kit.fontawesome.com/805ff9ebe8.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <div class="progress-bar">
+            <div id="progress"><div class="progress-shine"></div></div>
+        </div>
+    </header>
+    <h2>כתבו מה שאתם שומעים</h2>
+    <section class="listen">
+        <img src="../assets/character.png" alt="character drawing" id="character">
+        <button id="play-audio">
+            <img src="../assets/sound-full.svg" alt="play audio icon" class="icon">
+        </button>
+    </section>
+    
+    <form>
+        <textarea name="write-sentence" id="write-sentence" rows="3" placeholder="כתבו את המשפט שאתם שומעים"></textarea>
+        
+        <button id="check" class="submit" disabled>בדיקה</button>
+
+        <div id="correct-answer-container" class="">
+            <h3>התשובה הנכונה:</h3>
+            <p id="correct-answer">بروح على المدرسة كل يوم</p>
+        </div>
+    </form>
+</body>
+</html>
