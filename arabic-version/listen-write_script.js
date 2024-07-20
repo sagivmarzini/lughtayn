@@ -1,14 +1,21 @@
 import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
 const client = await Client.connect("guymorlan/levanti_he_ar");
+// const client = await Client.connect("https://levantitranslate.com/");
+
+const ANSWER_COMPARE_PERCENT = 90;
 
 let sentences = [];
 let shuffledSentences = [];
 let currentSentenceIndex = 0;
-let currentSentence = '';
-let arabicSentence = '';
-let diacritizedArabic = '';
+let currentSentence = {
+    hebrew: '',
+    arabic: '',
+    diacritized: '',
+    taatik: '',
+    audio: new Audio()
+};
 let nextSentence = null;
-let sentenceAudio = new Audio();
 let score = 0;
 let levelupScore = 5;
 let level = 1;
@@ -16,46 +23,108 @@ let level = 1;
 const playAudioButton = document.getElementById('play-audio');
 const textarea = document.getElementById('write-sentence');
 const checkButton = document.getElementById('check');
+const correctAnswerContainer = document.getElementById('correct-answer-container')
+const correctAnswerHeader = document.getElementById('correct-answer-header');
+const correctAnswerElement = document.getElementById('correct-answer');
+const correctAnswerTaatikElement = document.getElementById('correct-answer-taatik');
+const answerTranslationElement = document.getElementById('answer-translation');
 
-window.addEventListener('DOMContentLoaded', event => {
-    startGame();
-});
+startGame();
 
 textarea.addEventListener('input', updateCheckButtonState);
-
-playAudioButton.addEventListener('click', event => sentenceAudio.play());
+playAudioButton.addEventListener('click', () => currentSentence.audio.play());
+checkButton.addEventListener('click', checkAnswer);
 
 async function startGame() {
+    textarea.value = '';
+
     if (sentences.length === 0) {
         sentences = await fetchSentences();
         shuffledSentences = shuffleArray([...sentences]);
     }
     
+    textarea.disabled = true;
     if (nextSentence) {
-        currentSentence = nextSentence.original;
-        arabicSentence = nextSentence.translated;
-        diacritizedArabic = nextSentence.diacritized;
-        sentenceAudio.src = nextSentence.audio;
+        currentSentence = nextSentence;
         nextSentence = null;
     } else {
-        currentSentence = shuffledSentences[currentSentenceIndex].trim();
-        arabicSentence = await translateSentence(currentSentence);
-        diacritizedArabic = await diacritizeSentence(arabicSentence);
-        sentenceAudio.src = await generateSentenceAudio(diacritizedArabic);
+        currentSentence.hebrew = shuffledSentences[currentSentenceIndex].trim();
+        currentSentence.arabic = await translateSentence(currentSentence.hebrew);
+        currentSentence.diacritized = await diacritizeSentence(currentSentence.arabic);
+        currentSentence.taatik = await generateTaatik(currentSentence.diacritized);
+        currentSentence.audio.src = await generateSentenceAudio(currentSentence.diacritized);
     }
+    textarea.disabled = false;
 
-    console.log(sentenceAudio)
-    sentenceAudio.play();
+    console.log(currentSentence);
+    console.log(currentSentence.arabic);
+    currentSentence.audio.play();
     
     preloadNextSentence();
 }
 
 function updateCheckButtonState() {
-    if (textarea.value.trim() !== '') {
-        checkButton.disabled = false;
-      } else {
-        checkButton.disabled = true;
-      }
+    checkButton.disabled = textarea.value.trim() === '';
+}
+
+function toggleInputDisabled() {
+    textarea.disabled = !textarea.disabled;
+    playAudioButton.disabled = !playAudioButton.disabled;
+}
+
+function checkAnswer() {
+    let userAnswer = textarea.value.trim().replace('?', '');
+    let correctAnswer = currentSentence.arabic.replace('?', '');
+
+    if (similarity(userAnswer, correctAnswer) >= ANSWER_COMPARE_PERCENT) {
+        correctAnswerContainer.classList.add('correct');
+        correctAnswerHeader.hidden = true;
+        correctAnswerElement.hidden = true;
+        correctAnswerTaatikElement.hidden = true;
+
+        document.body.style.backgroundColor = '#f6fef6';
+
+        score++;
+    } else {
+        checkButton.style.backgroundColor = '#C22B27';
+        correctAnswerContainer.classList.add('incorrect');
+        correctAnswerHeader.hidden = false;
+        correctAnswerElement.hidden = false;
+        correctAnswerTaatikElement.hidden = false;
+
+        document.body.style.backgroundColor = '#fdf7f6';
+
+        if (score > 0) score--; // Prevent negative score
+    }
+
+    correctAnswerElement.textContent = correctAnswer;
+    correctAnswerTaatikElement.textContent = currentSentence.taatik;
+    answerTranslationElement.textContent = currentSentence.hebrew;
+    correctAnswerContainer.classList.add('show');
+
+    checkButton.innerText = 'המשך'
+    checkButton.removeEventListener('click', checkAnswer);
+    checkButton.addEventListener('click', nextQuestion);
+}
+
+function nextQuestion() {
+    textarea.value = '';
+    correctAnswerContainer.classList = '';
+
+    // Reset button styles and content
+    checkButton.innerHTML = 'בדיקה';
+    checkButton.style = '';
+    updateCheckButtonState();
+    document.body.style.backgroundColor = 'var(--background)';
+    
+    currentSentenceIndex = (currentSentenceIndex + 1) % shuffledSentences.length;
+    
+    // Start the game again with the next sentence
+    startGame();
+    
+    // Switch back to checkAnswer listener
+    checkButton.removeEventListener('click', nextQuestion);
+    checkButton.addEventListener('click', checkAnswer);
 }
 
 async function preloadNextSentence() {
@@ -63,8 +132,46 @@ async function preloadNextSentence() {
     const sentence = shuffledSentences[nextIndex].trim();
     const translated = await translateSentence(sentence);
     const diacritized = await diacritizeSentence(translated);
+    const taatik = await generateTaatik(diacritized);
     const audioUrl = await generateSentenceAudio(diacritized);
-    nextSentence = { original: sentence, translated, diacritized, audio: audioUrl };
+    nextSentence = { hebrew: sentence, arabic: translated, diacritizedArabic: diacritized, taatik, audio: new Audio(audioUrl) };
+}
+
+function levenshteinDistance(s1, s2) {
+    const len1 = s1.length;
+    const len2 = s2.length;
+    const matrix = [];
+
+    // Create the matrix
+    for (let i = 0; i <= len1; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= len2; j++) {
+        matrix[0][j] = j;
+    }
+
+    // Fill the matrix
+    for (let i = 1; i <= len1; i++) {
+        for (let j = 1; j <= len2; j++) {
+            if (s1.charAt(i - 1) === s2.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    matrix[i][j - 1] + 1,     // insertion
+                    matrix[i - 1][j] + 1      // deletion
+                );
+            }
+        }
+    }
+
+    return matrix[len1][len2];
+}
+
+function similarity(s1, s2) {
+    const distance = levenshteinDistance(s1, s2);
+    const maxLen = Math.max(s1.length, s2.length);
+    return (1 - distance / maxLen) * 100;
 }
 
 function shuffleArray(array) {
@@ -78,20 +185,20 @@ function shuffleArray(array) {
 async function fetchSentences() {
     try {
         const response = await fetch('../api/hebrew-sentences.json');
-        const sentences = await response.json();
-
-        return sentences;
-      } catch (error) {
+        return await response.json();
+    } catch (error) {
         console.error('Error fetching Hebrew sentences:', error);
-      }
+        return [];
+    }
 }
 
 async function translateSentence(sentence) {
     const result = await client.predict("/run_translate", { 		
-        text: sentence[0],
+        // text: sentence[0],
+        text: 'P',
         input_text: sentence,
         hidden_arabic: "",
-        dialect: "פלסטיני",
+        dialect: "P",
     });
 
     return result.data[1];
@@ -99,7 +206,8 @@ async function translateSentence(sentence) {
 
 async function diacritizeSentence(arabicSentence) {
     const result = await client.predict("/diacritize", { 		
-        text: arabicSentence[0],
+        // text: arabicSentence[0],
+        text: 'P',
         input_text: arabicSentence,
         hidden_arabic: "",
     });
@@ -109,7 +217,8 @@ async function diacritizeSentence(arabicSentence) {
 
 async function generateSentenceAudio(sentence) {
     const result = await client.predict("/get_audio", { 		
-        text: sentence[0], 
+        // text: sentence[0], 
+        text: 'P', 
         input_text: sentence,
         hidden_arabic: ''
     });
@@ -117,3 +226,13 @@ async function generateSentenceAudio(sentence) {
     return result.data[0].url;
 }
 
+async function generateTaatik(diacritizedSentence) {
+    const result = await client.predict("/taatik", { 		
+        // text: diacritizedSentence[0], 
+        text: 'P', 
+        input_text: diacritizedSentence,
+        hidden_arabic: ''
+    });
+
+    return result.data[0];
+}
