@@ -22,6 +22,8 @@ let level = 1;
 
 const progressBar = document.getElementById('progress');
 const playAudioButton = document.getElementById('play-audio');
+const playAudioIcon = document.getElementById('play-audio-icon');
+const audioLoadingElement = document.getElementById('audio-loading');
 const textarea = document.getElementById('write-sentence');
 const checkButton = document.getElementById('check');
 const correctAnswerContainer = document.getElementById('correct-answer-container')
@@ -33,6 +35,12 @@ const answerTranslationElement = document.getElementById('answer-translation');
 startGame();
 
 textarea.addEventListener('input', updateCheckButtonState);
+textarea.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        checkButton.click();
+    }
+});
 playAudioButton.addEventListener('click', () => currentSentence.audio.play());
 checkButton.addEventListener('click', checkAnswer);
 
@@ -68,9 +76,10 @@ function updateCheckButtonState() {
     checkButton.disabled = textarea.value.trim() === '';
 }
 
-function toggleInputDisabled() {
+function toggleInputDisabled(onoff) {
     textarea.disabled = !textarea.disabled;
-    playAudioButton.disabled = !playAudioButton.disabled;
+    playAudioIcon.hidden = !playAudioIcon.hidden;
+    audioLoadingElement.hidden = !audioLoadingElement.hidden;
 }
 
 function checkAnswer() {
