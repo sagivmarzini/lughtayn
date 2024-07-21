@@ -20,6 +20,9 @@ let score = 0;
 let levelupScore = 5;
 let level = 1;
 
+const correctSound = new Audio('../sounds/correct.mp3');
+const incorrectSound = new Audio('../sounds/incorrect.mp3');
+
 const progressBar = document.getElementById('progress');
 const playAudioButton = document.getElementById('play-audio');
 const playAudioIcon = document.getElementById('play-audio-icon');
@@ -87,6 +90,8 @@ function checkAnswer() {
     if (userAnswer === correctAnswer ||
         userAnswer === currentSentence.hebrew.trim().replace('?', '')
     ) {
+        correctSound.play();
+
         correctAnswerContainer.classList.add('correct');
         correctAnswerHeader.hidden = true;
         correctAnswerElement.hidden = true;
@@ -96,7 +101,9 @@ function checkAnswer() {
 
         score++;
     } else if (similarity(userAnswer, correctAnswer) >= ANSWER_COMPARE_PERCENT ||
-                similarity(userAnswer, currentSentence.hebrew) >= ANSWER_COMPARE_PERCENT) {
+                similarity(userAnswer, currentSentence.hebrew.replace('?', '')) >= ANSWER_COMPARE_PERCENT) {
+        correctSound.play();
+
         correctAnswerContainer.classList.add('correct');
         correctAnswerHeader.hidden = false;
         correctAnswerElement.hidden = false;
@@ -106,6 +113,8 @@ function checkAnswer() {
 
         score++;
     } else {
+        incorrectSound.play();
+
         checkButton.style.backgroundColor = '#C22B27';
         correctAnswerContainer.classList.add('incorrect');
         correctAnswerHeader.hidden = false;
