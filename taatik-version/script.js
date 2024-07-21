@@ -13,6 +13,9 @@ let score = 0;
 let levelupScore = 5;
 let level = 1;
 
+const correctSound = new Audio('../sounds/correct.mp3');
+const incorrectSound = new Audio('../sounds/incorrect.mp3');
+
 const sentenceConstructArea = document.getElementById('construct-sentence');
 const wordBankArea = document.getElementById('word-bank');
 const checkButton = document.getElementById('check');
@@ -125,11 +128,15 @@ function checkAnswer() {
 
     // if (compareSentenceWithWordArray(arabicSentence.replace('?', ''), constructWords)) { // Correct answer
     if (arabicSentence.replace('?', '') === userSentence) { // Correct answer
+        correctSound.play();
+
         correctAnswerContainer.classList.add('correct');
         document.body.style.backgroundColor = '#f6fef6';
 
         score++;
     } else {
+        incorrectSound.play();
+
         checkButton.style.backgroundColor = '#C22B27';
         correctAnswerContainer.classList.add('incorrect');
         document.body.style.backgroundColor = '#fdf7f6';
