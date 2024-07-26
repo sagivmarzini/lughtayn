@@ -10,15 +10,15 @@ const gameContent = {
         title: "בניית משפטים",
         description: "המשחק נותן בכל פעם משפט בעברית, ועליך לבנות את התרגום באמצעות המילים הניתנות",
         buttons: [
-            { text: "גרסת ערבית", url: "/arabic-version/word-bank.html" },
-            { text: "גרסת תעתיק עברי", url: "/taatik-version/index.html" }
+            { text: "גרסת ערבית", url: "./arabic-version/word-bank.html" },
+            { text: "גרסת תעתיק עברי", url: "./taatik-version/index.html" }
         ]
     },
     listening: {
         title: "האזנה וכתיבה",
         description: "האזן למשפטים בערבית וכתוב את מה שאתה שומע בערבית, או את התרגום בעברית",
         buttons: [
-            { text: "התחל", url: "/arabic-version/listen-write.html" }
+            { text: "התחל", url: "./arabic-version/listen-write.html" }
         ]
     }
 };
