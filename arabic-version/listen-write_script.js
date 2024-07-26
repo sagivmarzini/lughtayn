@@ -250,11 +250,7 @@ async function fetchSentences() {
 
 async function translateSentence(sentence) {
     const result = await client.predict("/run_translate", { 		
-        // text: sentence[0],
-        text: 'P',
-        input_text: sentence,
-        hidden_arabic: "",
-        dialect: "P",
+        text: sentence,
     });
 
     return result.data[1];
@@ -262,10 +258,7 @@ async function translateSentence(sentence) {
 
 async function diacritizeSentence(arabicSentence) {
     const result = await client.predict("/diacritize", { 		
-        // text: arabicSentence[0],
-        text: 'P',
-        input_text: arabicSentence,
-        hidden_arabic: "",
+        text: arabicSentence,
     });
 
     return result.data[0];
@@ -273,10 +266,7 @@ async function diacritizeSentence(arabicSentence) {
 
 async function generateSentenceAudio(sentence) {
     const result = await client.predict("/get_audio", { 		
-        // text: sentence[0], 
-        text: 'P', 
         input_text: sentence,
-        hidden_arabic: ''
     });
 
     return result.data[0].url;
@@ -284,10 +274,7 @@ async function generateSentenceAudio(sentence) {
 
 async function generateTaatik(diacritizedSentence) {
     const result = await client.predict("/taatik", { 		
-        // text: diacritizedSentence[0], 
-        text: 'P', 
-        input_text: diacritizedSentence,
-        hidden_arabic: ''
+        text: diacritizedSentence,
     });
 
     return result.data[0];

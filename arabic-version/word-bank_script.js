@@ -8,7 +8,8 @@ let currentSentence = '';
 let arabicSentence = '';
 let diacritizedArabic = '';
 let nextSentence = null;
-let sentenceAudio = null;
+let sentenceAudioUrl = null;
+let sentenceAudio;
 let score = 0;
 let levelupScore = 5;
 let level = 1;
@@ -25,6 +26,7 @@ const correctAnswer = document.getElementById('correct-answer');
 const progressBar = document.getElementById('progress');
 
 checkButton.addEventListener('click', checkAnswer);
+correctAnswerContainer.addEventListener('click', () => sentenceAudio.play());
 
 startGame();
 
@@ -75,13 +77,13 @@ async function startGame() {
         currentSentence = nextSentence.original;
         arabicSentence = nextSentence.translated;
         diacritizedArabic = nextSentence.diacritized;
-        sentenceAudio = nextSentence.audio;
+        sentenceAudioUrl = nextSentence.audio;
         nextSentence = null;
     } else {
         currentSentence = shuffledSentences[currentSentenceIndex].trim();
         arabicSentence = await translateSentence(currentSentence);
         diacritizedArabic = await diacritizeSentence(arabicSentence);
-        sentenceAudio = await generateSentenceAudio(diacritizedArabic);
+        sentenceAudioUrl = await generateSentenceAudio(diacritizedArabic);
     }
 
     saveGameState();
@@ -116,7 +118,8 @@ function populateWordBank(translatedSentence) {
 }
 
 function checkAnswer() {
-    new Audio(sentenceAudio).play();
+    sentenceAudio = new Audio(sentenceAudioUrl);
+    sentenceAudio.play();
 
     const constructWords = [...sentenceConstructArea.children].map(word => word.textContent);
     const userSentence = constructWords.join(' ').trim();
@@ -156,6 +159,7 @@ function checkAnswer() {
 }
 
 function nextQuestion() {
+    sentenceAudio.pause();
     sentenceDisplay.innerHTML = '';
     clearWords();
     correctAnswerContainer.classList = '';
@@ -264,7 +268,7 @@ function saveGameState() {
         arabicSentence,
         diacritizedArabic,
         nextSentence,
-        sentenceAudio,
+        sentenceAudio: sentenceAudioUrl,
         score,
         levelupScore,
         level
@@ -284,7 +288,7 @@ function loadGameState() {
             arabicSentence,
             diacritizedArabic,
             nextSentence,
-            sentenceAudio,
+            sentenceAudio: sentenceAudioUrl,
             score,
             levelupScore,
             level
@@ -296,10 +300,7 @@ function loadGameState() {
 
 async function translateSentence(sentence) {
     const result = await client.predict("/run_translate", { 		
-        text: 'P',
-        input_text: sentence,
-        hidden_arabic: "",
-        dialect: "P",
+        text: sentence,
     });
 
     return result.data[1];
@@ -307,9 +308,7 @@ async function translateSentence(sentence) {
 
 async function diacritizeSentence(arabicSentence) {
     const result = await client.predict("/diacritize", { 		
-        text: 'P',
-        input_text: arabicSentence,
-        hidden_arabic: "",
+        text: arabicSentence,
     });
 
     return result.data[0];
@@ -317,9 +316,7 @@ async function diacritizeSentence(arabicSentence) {
 
 async function generateSentenceAudio(sentence) {
     const result = await client.predict("/get_audio", { 		
-        text: 'P', 
         input_text: sentence,
-        hidden_arabic: ''
     });
 
     return result.data[0].url;
