@@ -94,6 +94,34 @@ body {
 
 }
 
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.popover-button {
+    height: 40px;
+    background-color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0px 4px rgba(0, 0, 0, 0.3);
+    transition: 0.1s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popover-button:hover {
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
 #overlay {
     display: none;
     position: absolute;

@@ -3,16 +3,23 @@ const popover = document.getElementById('game-info');
 const popoverOverlay = document.getElementById('overlay');
 const popoverTitle = document.getElementById('game-title');
 const popoverDescription = popover.querySelector('p');
-const popoverButton = popover.querySelector('button');
+const popoverButtonContainer = popover.querySelector('.button-container');
 
 const gameContent = {
     sentences: {
         title: "בניית משפטים",
         description: "המשחק נותן בכל פעם משפט בעברית, ועליך לבנות את התרגום באמצעות המילים הניתנות",
+        buttons: [
+            { text: "גרסת ערבית", url: "/arabic-version/word-bank.html" },
+            { text: "גרסת תעתיק עברי", url: "/taatik-version/index.html" }
+        ]
     },
     listening: {
         title: "האזנה וכתיבה",
         description: "האזן למשפטים בערבית וכתוב את מה שאתה שומע בערבית, או את התרגום בעברית",
+        buttons: [
+            { text: "התחל", url: "/arabic-version/listen-write.html" }
+        ]
     }
 };
 
@@ -40,6 +47,18 @@ function updatePopoverContent(gameType) {
     const content = gameContent[gameType];
     popoverTitle.textContent = content.title;
     popoverDescription.textContent = content.description;
+    
+    // Clear existing buttons
+    popoverButtonContainer.innerHTML = '';
+    
+    // Create new buttons
+    content.buttons.forEach(buttonInfo => {
+        const button = document.createElement('a');
+        button.textContent = buttonInfo.text;
+        button.href = buttonInfo.url;
+        button.className = 'popover-button';
+        popoverButtonContainer.appendChild(button);
+    });
 }
 
 function getElementYPosition(element) {
