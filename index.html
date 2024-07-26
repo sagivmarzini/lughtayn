@@ -9,17 +9,15 @@
 </head>
 <body>
     <section class="container">
-        <button class="game-btn" id="build-sentences">
-
-        </button>
-        <button class="game-btn" id="listen-write">
-            
-        </button>
+        <button id="build-sentences" class="game-btn" data-game-type="sentences"></button>
+        <button id="listen-write" class="game-btn" data-game-type="listening"></button>
     </section>
-    <div id="game-info">
+    
+    <div id="game-info" class="popover-content">
         <h3 id="game-title">השלמת משפטים</h3>
-        <p>משחק מגניב כזה העתק של דואלינגו שאתה מקבל משפט בעברית ומתרגם לערבית</p>
-        <button>משחק</button>
+        <p>משחק מגניב כזה העתקה של דואלינגו שאתה מקבל משפט בעברית ומתרגם לערבית</p>
+        <button>התחל</button>
     </div>
+    <div id="overlay"></div>
 </body>
 </html>
